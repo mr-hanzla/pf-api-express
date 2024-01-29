@@ -41,10 +41,10 @@ function respondErrorMessage(res, error) {
 router.get('/', async (req, res) => {
     try {
         // Get company name from header
-        const { company_name } = req.body;
+        const { companyName } = req.body;
 
         // If company name is present, search with company name
-        const { rows } = company_name ? await getCompanyDataByName(company_name)
+        const { rows } = companyName ? await getCompanyDataByName(companyName)
         : await getAllCompanyData();
 
         // Send the query result as JSON response
@@ -57,12 +57,12 @@ router.get('/', async (req, res) => {
 
 router.post('/register', async (req, res) => {
     // Extract data from the form
-    const { company_name, company_description, employee_name, email, password } = req.body;
-    console.log({company_name, company_description, employee_name, email, password});
+    const { companyName, companyDescription, employeeName, email, password } = req.body;
+    console.log({companyName, companyDescription, employeeName, email, password});
 
     // step-1: register company data
     const companyInsertQuery = 'INSERT INTO company (company_name, company_description) VALUES ($1, $2) RETURNING company_id;';
-    pool.query(companyInsertQuery, [company_name, company_description], (err, result) => {
+    pool.query(companyInsertQuery, [companyName, companyDescription], (err, result) => {
         if (err) {
             respondErrorMessage(res, err);
         } else {
@@ -75,12 +75,12 @@ router.post('/register', async (req, res) => {
                 } else {
                     // step-3: once company is registered with a department, add a employee
                     const employeeInsertQuery = 'INSERT INTO employee (employee_name, employee_email, employee_password, department_id, company_id) VALUES ($1, $2, $3, $4, $5);';
-                    pool.query(employeeInsertQuery, [employee_name, email, password, Departments.Admin, companyId], (empError, empResults) => {
+                    pool.query(employeeInsertQuery, [employeeName, email, password, Departments.Admin, companyId], (empError, empResults) => {
                         if (empError) {
                             respondErrorMessage(res, empError);
                         } else {
                             // Send a success response
-                            res.status(201).json({ message: `'${company_name}' is registered!` });
+                            res.status(201).json({ message: `'${companyName}' is registered!` });
                         }
                     });
                 }
