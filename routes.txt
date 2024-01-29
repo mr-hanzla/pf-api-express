@@ -1,0 +1,27 @@
+================================
+What: Provides a JSON list of all the available companies
+Route: /company
+Method: GET
+================================
+What: Authenticates user
+Route: /auth/login
+Method: POST
+Body:
+{
+    "email": "<email>",
+    "password": "<password>"
+}
+================================
+What: Registers a company
+Route: /company/register
+Method: POST
+Body:
+{
+    "company_name": "<company name>",
+    "company_description": "<company description>",
+    "employee_name": "<employee name>",
+    "email": "<employee email>",
+    "password": "<employee password>"
+}
+================================
+
