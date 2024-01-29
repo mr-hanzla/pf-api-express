@@ -17,9 +17,9 @@ Route: /company/register
 Method: POST
 Body:
 {
-    "company_name": "<company name>",
-    "company_description": "<company description>",
-    "employee_name": "<employee name>",
+    "companyName": "<company name>",
+    "companyDescription": "<company description>",
+    "employeeName": "<employee name>",
     "email": "<employee email>",
     "password": "<employee password>"
 }
