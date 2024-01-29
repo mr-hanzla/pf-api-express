@@ -1,3 +1,4 @@
+Access Point: https://2c21-182-176-157-31.ngrok-free.app
 ================================
 What: Provides a JSON list of all the available companies
 Route: /company
