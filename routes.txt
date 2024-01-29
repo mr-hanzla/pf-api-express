@@ -1,8 +1,16 @@
 Access Point: https://2c21-182-176-157-31.ngrok-free.app
 ================================
-What: Provides a JSON list of all the available companies
+What: Provides a list of all the available companies
 Route: /company
 Method: GET
+================================
+What: Provides detail of the given company
+Route: /company
+Method: GET
+Body:
+{
+    "companyName": "<company name>"
+}
 ================================
 What: Authenticates user
 Route: /auth/login
@@ -35,6 +43,15 @@ Body:
     "employeeName": "<employee name>",
     "email": "<employee email>",
     "password": "<employee password>"
+}
+================================
+What: Adds department to a company
+Route: /company/add-department
+Method: POST
+Body:
+{
+    "companyName": "Testing Company11"
+    "departmentName": "Sales"
 }
 ================================
 
