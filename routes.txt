@@ -1,4 +1,6 @@
-Access Point: https://2c21-182-176-157-31.ngrok-free.app
+Access Point: https://d8e8-182-176-157-31.ngrok-free.app
+Note: The above link is subject to change, kindly verify before using it.
+
 ================================
 What: Provides a list of all the available companies
 Route: /company
