@@ -64,4 +64,13 @@ Body:
     "companyName": "<company name>",
 }
 ================================
+What: Updates a company
+Route: /company/update
+Method: DELETE
+Body:
+{
+    "companyName": "<company name>",
+    "updatedCompanyName": "<updated company name>"
+}
+================================
 
