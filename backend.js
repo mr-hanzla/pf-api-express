@@ -55,17 +55,14 @@ function respondErrorMessage(res, error) {
 //                      ROUTES
 // ==========================================================
 
-var company = require('./company.js');
+const company = require('./company.js');
 app.use('/company', company);
 
-var auth = require('./auth.js');
+const department = require('./department.js');
+app.use('/department', department)
+
+const auth = require('./auth.js');
 app.use('/auth', auth);
-
-// app.post('/add-department', async (req, res) => {
-//     const { email } = req.body;
-// });
-
-// app.delete
 
 // Start the Express server
 app.listen(port, '0.0.0.0', () => {
