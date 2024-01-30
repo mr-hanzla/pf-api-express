@@ -8,6 +8,7 @@ const pool = new Pool(dbConfig);
 // ==========================================================
 const commons = require('./commons.js');
 const constants = require('./constants.js');
+const dbOps = require('./db_ops.js');
 // ==========================================================
 
 router.post('/login', async (req, res) => {
@@ -33,7 +34,7 @@ router.post('/signup', async (req, res) => {
     const { employeeName, email, password, departmentName, companyName } = req.body;
 
     const depId = constants.Departments[departmentName];
-    let companyId = await commons.getCompanyId(companyName);
+    let companyId = await dbOps.getCompanyId(companyName);
 
     if (depId === undefined || companyId === -1) {
         return res.status(constants.HTTP.BadRequest).json({ message: `ERROR! Invalid Company Name or Department Name!` });

@@ -18,8 +18,8 @@ router.get('/', async (req, res) => {
         const { companyName } = req.body;
 
         // If company name is present, search with company name
-        const { rows } = companyName ? await commons.getCompanyDataByName(companyName)
-        : await commons.getAllCompanyData();
+        const { rows } = companyName ? await dbOps.getCompanyDataByName(companyName)
+        : await dbOps.getAllCompanyData();
 
         // Send the query result as JSON response
         res.status(201).json(rows);
@@ -34,7 +34,7 @@ router.post('/add-department', async (req, res) => {
         const { companyName, departmentName } = req.body;
 
         const depId = constants.Departments[departmentName];
-        const companyId = await commons.getCompanyId(companyName);
+        const companyId = await dbOps.getCompanyId(companyName);
 
         console.log(depId === undefined, companyId === -1);
 
@@ -54,6 +54,27 @@ router.post('/add-department', async (req, res) => {
         }
     } catch (error) {
         error.hint = 'Company Name or Department Name is Invalid!';
+        commons.respondErrorMessage(res, error);
+    }
+});
+
+router.delete('/remove', async (req, res) => {
+    let queryResults;
+    try {
+        const { companyName } = req.body;
+
+        const companyId = await dbOps.getCompanyId(companyName);
+        queryResults = await dbOps.deleteCompanyById(companyId);
+
+        if (queryResults) {
+            if (queryResults.rowCount > 0) {
+                res.status(constants.HTTP.OK).json({message: `'${companyName}' is deleted!`})
+            } else {
+                res.status(constants.HTTP.NotFound).json({message: `'${companyName}' is not found!`})
+            }
+        }
+    } catch (error) {
+        error.hint = 'Error: Invalid request!';
         commons.respondErrorMessage(res, error);
     }
 });
@@ -78,7 +99,7 @@ router.post('/register', async (req, res) => {
     } catch (error) {
         console.log(`COMPANY-ID: ${companyId}`);
         if (companyId) {
-            await commons.deleteCompanyById(companyId);
+            await dbOps.deleteCompanyById(companyId);
         }
         commons.respondErrorMessage(res, error);
     }

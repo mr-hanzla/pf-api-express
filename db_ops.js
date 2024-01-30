@@ -51,8 +51,43 @@ async function insertEmployee(employeeName, email, password, depId, companyId) {
     }
 }
 
+async function getCompanyId(companyName) {
+    const companyQuery = 'SELECT company_id FROM company WHERE company_name = $1;';
+    try {
+        const results = await pool.query(companyQuery, [companyName]);
+        if (results.rows.length > 0) {
+            return results.rows[0].company_id;
+        } else {
+            // Company not found
+            return -1;
+        }
+    } catch (error) {
+        throw error;
+    }
+}
+
+function getAllCompanyData() {
+    const allCompanyQuery = 'SELECT * FROM company;';
+    return pool.query(allCompanyQuery);
+}
+
+function getCompanyDataByName(name) {
+    const allCompanyQuery = 'SELECT * FROM company WHERE company_name = $1;';
+    return pool.query(allCompanyQuery, [name]);
+}
+
+async function deleteCompanyById(companyId) {
+    const deleteCompanyQuery = 'DELETE FROM company WHERE company_id = $1;';
+    return await pool.query(deleteCompanyQuery, [companyId]);
+}
+
+// ============================================
 module.exports = {
     insertCompanyData,
     insertCompanyDepartment,
-    insertEmployee
+    insertEmployee,
+    getCompanyId,
+    getAllCompanyData,
+    getCompanyDataByName,
+    deleteCompanyById,
 }
