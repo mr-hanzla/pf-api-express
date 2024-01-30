@@ -14,6 +14,8 @@ const dbOps = require('./db_ops.js');
 // /company
 router.get('/', async (req, res) => {
     try {
+        // res.status(constants.HTTP.OK).send("This is a simple response!");
+        // res.status(constants.HTTP.OK).json({ message: "This is a JSON response!"});
         // Get company name from header
         const { companyName } = req.body;
 
@@ -21,7 +23,7 @@ router.get('/', async (req, res) => {
         const { rows } = companyName ? await dbOps.getCompanyDataByName(companyName)
         : await dbOps.getAllCompanyData();
 
-        // Send the query result as JSON response
+        // // Send the query result as JSON response
         res.status(201).json(rows);
     } catch (error) {
         console.error('Error executing query:', error);
@@ -59,22 +61,34 @@ router.post('/add-department', async (req, res) => {
 });
 
 router.delete('/remove', async (req, res) => {
-    let queryResults;
     try {
         const { companyName } = req.body;
 
         const companyId = await dbOps.getCompanyId(companyName);
-        queryResults = await dbOps.deleteCompanyById(companyId);
+        const queryResults = companyId > 0 ? await dbOps.deleteCompanyById(companyId) : null;
 
         if (queryResults) {
-            if (queryResults.rowCount > 0) {
-                res.status(constants.HTTP.OK).json({message: `'${companyName}' is deleted!`})
-            } else {
-                res.status(constants.HTTP.NotFound).json({message: `'${companyName}' is not found!`})
-            }
+            if (queryResults.rowCount > 0)
+                res.status(constants.HTTP.OK).json({message: `'${companyName}' is deleted!`});
         }
+        res.status(constants.HTTP.NotFound).json({message: `'${companyName}' is not found!`});
     } catch (error) {
         error.hint = 'Error: Invalid request!';
+        commons.respondErrorMessage(res, error);
+    }
+});
+
+router.put('/update', async (req, res) => {
+    try {
+        const { companyName, updatedCompanyName } = req.body;
+
+        const companyId = await dbOps.getCompanyId(companyName);
+        const companyResults = await dbOps.updateCompanyData(companyId, updatedCompanyName);
+
+        res.status(constants.HTTP.OK).json({message: `'${companyName}' is updated!`});
+
+    } catch (error) {
+        error.hint = 'Error: Invalid Request!';
         commons.respondErrorMessage(res, error);
     }
 });

@@ -81,6 +81,11 @@ async function deleteCompanyById(companyId) {
     return await pool.query(deleteCompanyQuery, [companyId]);
 }
 
+async function updateCompanyData(companyId, updatedCompanyName, updatedDescription) {
+    const updateQuery = 'UPDATE company SET company_name = $1 WHERE company_id = $2';
+    return await pool.query(updateQuery, [updatedCompanyName, companyId]);
+}
+
 // ============================================
 module.exports = {
     insertCompanyData,
@@ -90,4 +95,5 @@ module.exports = {
     getAllCompanyData,
     getCompanyDataByName,
     deleteCompanyById,
+    updateCompanyData
 }
