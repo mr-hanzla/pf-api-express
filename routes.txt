@@ -50,8 +50,16 @@ Route: /company/add-department
 Method: POST
 Body:
 {
-    "companyName": "Testing Company11"
-    "departmentName": "Sales"
+    "companyName": "<company name>",
+    "departmentName": "<department name>" [Admin, Marketing, Sales, Production, Legal]
+}
+================================
+What: Deletes a company
+Route: /company/remove
+Method: DELETE
+Body:
+{
+    "companyName": "<company name>",
 }
 ================================
 
