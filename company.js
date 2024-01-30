@@ -2,21 +2,16 @@ var express = require('express');
 const { Pool } = require('pg');
 var router = express.Router();
 
-const dbConfig = {
-    user: 'postgres',
-    host: 'localhost',
-    database: 'pf',
-    password: 'asdf1234',
-    port: 5432,
-};
-
+const dbConfig = require('./connection.json');
 const pool = new Pool(dbConfig);
 
 // ==========================================================
 const commons = require('./commons.js');
 const constants = require('./constants.js');
+const dbOps = require('./db_ops.js');
 // ==========================================================
 
+// /company
 router.get('/', async (req, res) => {
     try {
         // Get company name from header
@@ -30,42 +25,63 @@ router.get('/', async (req, res) => {
         res.status(201).json(rows);
     } catch (error) {
         console.error('Error executing query:', error);
-        res.status(500).json({ error: 'Internal Server Error' });
+        res.status(constants.HTTP.BadRequest).json({ error: 'Internal Server Error' });
+    }
+});
+
+router.post('/add-department', async (req, res) => {
+    try {
+        const { companyName, departmentName } = req.body;
+
+        const depId = constants.Departments[departmentName];
+        const companyId = await commons.getCompanyId(companyName);
+
+        console.log(depId === undefined, companyId === -1);
+
+        if (depId === undefined || companyId === -1) {
+            return res.status(constants.HTTP.BadRequest).json({ message: `ERROR! Invalid Company Name or Department Name!` });
+        }
+
+        const checkQuery = 'SELECT * FROM company_department WHERE company_id = $1 AND department_id = $2';
+        const checkResult = await pool.query(checkQuery, [companyId, depId]);
+
+        if (checkResult.rows.length === 0) {
+            const insertQuery = 'INSERT INTO company_department (company_id, department_id) VALUES ($1, $2)';
+            await pool.query(insertQuery, [companyId, depId]);
+            return res.status(201).json({ message: `'${departmentName}' department is added to '${companyName}'.` });
+        } else {
+            return res.status(constants.HTTP.BadRequest).json({ message: `'${departmentName}' already exists for '${companyName}'.` });
+        }
+    } catch (error) {
+        error.hint = 'Company Name or Department Name is Invalid!';
+        commons.respondErrorMessage(res, error);
     }
 });
 
 router.post('/register', async (req, res) => {
-    // Extract data from the form
-    const { companyName, companyDescription, employeeName, email, password } = req.body;
-    console.log({companyName, companyDescription, employeeName, email, password});
+    let companyId;
 
-    // step-1: register company data
-    const companyInsertQuery = 'INSERT INTO company (company_name, company_description) VALUES ($1, $2) RETURNING company_id;';
-    pool.query(companyInsertQuery, [companyName, companyDescription], (err, result) => {
-        if (err) {
-            commons.respondErrorMessage(res, err);
-        } else {
-            const companyId = result.rows[0].company_id;
-            // step-2: once company is registered, add a department to it
-            const depInsertQuery = 'INSERT INTO company_department (company_id, department_id) VALUES ($1, $2);';
-            pool.query(depInsertQuery, [companyId, constants.Departments.Admin], (depError, depResults) => {
-                if (depError) {
-                    commons.respondErrorMessage(res, depError);
-                } else {
-                    // step-3: once company is registered with a department, add a employee
-                    const employeeInsertQuery = 'INSERT INTO employee (employee_name, employee_email, employee_password, department_id, company_id) VALUES ($1, $2, $3, $4, $5);';
-                    pool.query(employeeInsertQuery, [employeeName, email, password, constants.Departments.Admin, companyId], (empError, empResults) => {
-                        if (empError) {
-                            commons.respondErrorMessage(res, empError);
-                        } else {
-                            // Send a success response
-                            res.status(201).json({ message: `'${companyName}' is registered!` });
-                        }
-                    });
-                }
-            });
+    try {
+        const { companyName, companyDescription, employeeName, email, password } = req.body;
+        console.log({companyName, companyDescription, employeeName, email, password});
+
+        // step-1: register company data
+        companyId = await dbOps.insertCompanyData(companyName, companyDescription);
+
+        // step-2: once company is registered, add a department to it
+        const depResults = await dbOps.insertCompanyDepartment(companyId, constants.Departments.Admin);
+
+        // step-3: lastly, add employee data to db
+        const employeeResults = await dbOps.insertEmployee(employeeName, email, password, constants.Departments.Admin, companyId);
+
+        res.status(201).json({ message: `'${companyName}' is registered!` });
+    } catch (error) {
+        console.log(`COMPANY-ID: ${companyId}`);
+        if (companyId) {
+            await commons.deleteCompanyById(companyId);
         }
-    });
+        commons.respondErrorMessage(res, error);
+    }
 });
 
 module.exports = router;
